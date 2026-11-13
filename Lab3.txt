@@ -1,0 +1,144 @@
+Denna uppgift handlar om att simulera förloppet av en epidemi. 
+Vi gör inledningsvis grovt förenklade antaganden och för gradvis in mer realism. 
+Caset är att simulera förloppet av Covid19. 
+bestämma om en allmän vaccination är ett effektivt sätt att reducera dödligheten.
+
+En by har ett antal personer. Varje person kan vara sjuk eller frisk. Börja med att simulera skapandet av en by. 
+Detta innebär att alla personerna skapas. När en person skapas finns en viss sannolikhet att hen är sjuk. 
+Skriv ut hur många som är sjuka efter skapandet.
+Gör så här: Det finns en huvudklass med en main-metod, en klass Village och en klass Person. 
+Klassen Village har en konstant final int SIZE som anger antal innevånare, 
+en instansvariabel population som är en array av Person, 
+en konstruktor som initierar denna array genom att anropa Person-konstruktorn inuti en loop, 
+och en metod int countSick() som räknar antal sjuka personer. 
+Person har än så länge bara en instansvariabel boolean isSick som anger om personen är sjuk, 
+en konstant final double INIT_SICK_PROB som anger sannolikheten att en ny person är sjuk, 
+och en konstruktor som sätter isSick till true med denna sannolikhet. 
+main-metoden skapar en by genom konstruktorn, räknar antal sjuka genom att anropa byns metod, 
+och skriver ut resultatet. Om du gjort rätt borde andelen sjuka bli ungefär lika med INIT_SICK_PROB. 
+Prova med lite olika värden på konstanterna. Ett lämpligt värde på SIZE är 1000, 
+men det är bra att enkelt kunna sätta det till något mindre om man tex ska felsöka med spårutskrifter.
+
+Importera random-biblioteket med import java.util.Random;. 
+Där du behöver en slumptalsgenerator (som i konstruktorn), gör en sådan med Random random = new Random();. 
+För att sätta ett värde till true med viss sannolikhet kan du sen använda nextDouble, 
+till exempel genom att sätta värdet till (random.nextDouble() < p) där p är sannolikheten. 
+(det är helt OK använda Math.random() också)
+
+ 
+
+När en dag förlöper så finns en viss sannolikhet för varje person att bli frisk. 
+Skriv ut antal sjuka tills ingen längre är sjuk.
+Gör så här: Person får en ny konstant final double GET_WELL_PROB som svarar mot sannolikheten att bli frisk under en dag. 
+Person får också en ny metod, void dayPasses(), som anger vad personen i fråga råkar ut för under dagen. 
+Här ska alltså isSick sättas till false med sannolikheten GET_WELL_PROB. 
+Även Village får en metod void dayPassesAll(), som helt enkelt anropar dayPasses() för alla innevånare. 
+main-metoden utökas genom en loop som anropar dayPassesAll() i varje varv, tills ingen längre är sjuk. 
+Prova med olika konstantvärden. Om du gjort rätt bör andelen sjuka avta exponentiellt mot noll.
+
+ 
+
+Tyvärr är sjukdomen dödlig och det finns en liten sannolikhet att en sjuk person avlider under varje dag. 
+Komplettera koden så att också det totala antalet döda skrivs ut varje dag. 
+Gör så här: Person får en ny konstant final double DIE_PROB och en ny instansvariabel boolean isDead. 
+I daypasses(), om personen är sjuk så dör den med sannolikhet DIE_PROB. 
+Observera att personen då inte längre ska räknas som sjuk så isSick ska sättas till false 
+(annars blir ju antalet sjuka aldrig noll!). Village kompletteras med en metod int countDead() som anropas av main.
+
+ 
+
+Dessvärre är sjukdomen också smittsam. I ett första lite orealistiskt scenario så antar vi att byn är så liten 
+och sjukdomen så virulent att alla som är sjuka smittar alla andra under en dag. 
+En frisk person som smittas insjuknar med en viss liten sannolikhet. Fortsätt simulera förloppet. 
+För att inte drunkna i resultat från varje dag så räcker det att för varje körning skriva ut hur många som dog. 
+Det är intressant att konstatera att antalet överlevande ofta inte beror av populationens storlek. 
+Det är också intressant att ibland minskar det totala antalet döda om sjukdomens dödlighet ökar 
+(eftersom sjuka då inte hinner smitta så många).
+Gör så här: Person får en ny konstant final double INFECT_PROB som anger sannolikheten att en smittad person blir sjuk, 
+och två nya metoder. Metoden void becomesInfected() gör att om personen lever så blir hen sjuk med 
+sannolikhet INFECT_PROB. Metoden void infect(Person victim) smittar parametern victim genom att anropa 
+dennes becomesInfected(). Metoden dayPasses() ska alltså kompletteras, för en person som är sjuk, 
+med en loop över alla personer, där infect() anropas med varje annan person som argument. 
+Detta betyder att dayPasses() måste få reda på vilka andra personer som finns. 
+Den informationen finns bara i klassen Village. Därför behöver signaturen för dayPasses() ändras så att den får en parameter 
+Person[] allPersons. Vid anropet av dayPasses(), som sker inifrån dayPassesAll(), 
+behövs alltså ett argument som anger vilka personer som finns, d.v.s. population.
+
+Strikt talat innebär det att en person därmed också kan smitta sig själv. 
+Detta kan undvikas genom att kolla att den som ska smittas inte är lika med this .
+
+Prova återigen med några intressanta kombinationer av parametervärden. 
+Det är svårt att testa denna typ av program om det finns stora datamängder och ett stokastiskt beteende. 
+Testa fall där resultatet är känt, t.ex. hörnfall där inga är sjuka, alla är sjuka, ingen kan smitta etc. 
+En bra metod kan vara att olika grupper som gjort olika program kör tester med samma värden på de ingående 
+konstanterna. Om resultaten blir drastiskt annorlunda har förmodligen en av grupperna ett fel. 
+Men tänk på att ordningen på satserna i dayPasses() kan spela roll! Slutligen kan du om du vill köra 
+små instanser av problemet (byn har enstaka innevånare) i pythontutor för att med egna ögon se vad som händer. 
+
+Turligt nog har smittspridningen faktiskt begränsad räckvidd: personer smittas bara om de befinner sig på 
+visst avstånd från varandra. Anta att byn är på ett område om 1000 x 1000 enheter, och varje person har en 
+initialt slumpmässigt bestämd position.
+Gör så här: Person får nya instansvariabler double xPos, yPos som initieras i konstruktorn till att vara 
+slumpmässiga mellan 0 och 1000. Där finns också en ny konstant final double RANGE som anger hur långt bort man kan 
+smitta. Metoden infect() ska bara smitta, d.v.s. anropa becomesInfected(), om avståndet mellan 
+den egna positionen och positionen hos victim är mindre än RANGE. Avståndet mellan positioner får man genom 
+Pythagoras sats.
+
+ 
+
+När man blivit sjuk dröjer det ett antal dagar innan man kan bli smittad igen. 
+Studera effekterna av hur detta påverkar epidemin.
+Gör så här: varje person får en ny konstant final int DAYS_IMMUNE som anger hur många dagar efter 
+tillfrisknande man är immun, och en ny instansvariabel int daysLeftImmune som ursprungligen är noll. 
+Är den inte noll räknas den ner varje dag. När man tillfrisknar får den värdet av DAYS_IMMUNE. 
+När den inte är noll kan man inte bli smittad, d.v.s. becomesInfected() sätter isSick till true bara om den är noll.
+
+ 
+
+En intressant tillämpning är att simulera Covid19 och effekten av social distansering. 
+Rimliga antaganden för den variant som först uppträdde är:
+
+GET_WELL_PROB = 0.2;
+DIE_PROB = 0.002;
+INFECT_PROB = 0.02;
+DAYS_IMMUNE = 1000;
+RANGE = 100;
+Det betyder att man i genomsnitt är sjuk och smittsam i fem dagar, att dödligheten är 1%, 
+och att man är immun för så lång tid som simuleringen pågår. Detta är grova uppskattningar och i verkligheten är 
+dödligheten nog mycket lägre, men med en simulering på bara 1000 personer blir en lägre dödlighet knappt mätbar, 
+så vi tar i lite där.
+
+Hur smittsam en sjukdom är brukar mätas i reproduktionstalet R0. Detta är medelvärdet av det antal personer som 
+en sjuk person smittar under sjukdomstiden i en initialt helt oskyddad befolkning. 
+Vi kan uppskatta R0 från våra data så här. De personer som kan smittas av en person är de som befinner sig inom 
+avståndet RANGE. Om personerna är jämnt fördelade över ytan blir andelen sådana personer ungefär kvoten mellan 
+den yta som täcks av RANGE-avståndet och hela ytan. Andelen personer blir alltså *RANGE2 / 10002 vilket 
+ungefär blir 0.03. Då det finns 1000 personer totalt blir det 0.03*1000 = 30 personer. 
+Varje person riskerar att smittas med en sannolikhet 0.02 under fem dagar, alltså sannolikhet 0.1. 
+R0 är väntevärdet på antalet smittade vilket blir 30*0.1 = 3. Det är en grov uppskattning som inte tar hänsyn till 
+personer som ligger nära bygränsen och alltså har färre grannar än de som är inne i byn. 
+Simuleringen tar heller inte hänsyn till att personer rör på sig (utöver att smitta inom sin RANGE), 
+och i verkligheten är sannolikhetsfördelningarna mer komplicerade. Men den ger ändå en viss bild av förloppet. 
+För Covid19 i Sverige uppskattades R0 initialt till 2.7, så detta är ungefär rätt.
+
+Covid19 är en klustersmitta så vi simulerar ett utbrott där alla personer inom ett område mellan 
+koordinaterna 400 och 600 i både x- och y-led är sjuka, alltså ett kvadratiskt område i mitten. 
+Person-konstruktorn ska alltså inte beakta INIT_SICK_PROB, utan istället sätta isSick till true om personen har 
+koordinaterna i detta område.
+
+Kör några simuleringar med detta. Utbrottet sprider sig i befolkningen. För varje dag skriv ut antalet sjuka, 
+antalet immuna (det kräver att du gör en metod countImmune()) och antalet döda. Hur många måste bli immuna innan 
+antalet sjuka slutar växa? Enligt epidemiologerna bör det inträffa när andelen som kan smittas 
+(dvs de som varken är immuna eller sjuka) sjunker under 1/R0, verkar det stämma? Vilket blir det maximala antalet 
+samtidiga sjuka?
+
+
+
+Myndigheterna rekommenderade social distansering, vilket innebär att man träffar mycket färre personer. 
+Antag grovt att en person som tillämpar detta har en RANGE som är hälften så stor, alltså träffar 
+en fjärdedel så många andra. Följsamheten är dock inte 100%. Låt Person ha en ny klassvariabel DISTANCING, 
+som är sannolikheten för att personen är följsam. I konstruktorn så ska RANGE med denna sannolikhet halveras. 
+Kör några simuleringar med olika värden på DISTANCING. Om den är 0 blir det samma som förut. Om den är 1, 
+dvs alla tillämpar distansering, så slutar utbrottet ganska snabbt. Sveriges epidemihantering koncentrerades på 
+att minska det maximala antalet samtidiga sjuka så att sjukvården hann med. Hur stor följsamhet verkar behövas för 
+att minska detta signifikant?
